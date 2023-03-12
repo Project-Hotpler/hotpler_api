@@ -21,7 +21,7 @@ public class ServerConfigure implements WebMvcConfigurer{
 
 	// 로그인 검증 안해도 되는 URL
 	String[] loginCheckUrl = {
-			"/api/user/loginCheck", "/api/user/", "/api/user/check/{id}"
+			"/api/user/login", "/api/user/", "/api/user/check/{id}"
 	};
 	List<String> loginCheckUrlList = Arrays.asList(loginCheckUrl);
 

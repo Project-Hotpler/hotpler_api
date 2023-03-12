@@ -15,34 +15,48 @@
 
 
 	<insert id="insertUser">
-		insert into login_user(id,password,name)
+		insert into user(id,password,name)
 		values(#{id},#{password},#{name});
 	</insert>
+
+	<update id="updateUser">
+		update user
+		set id = #{userVo.id},
+		    name = #{userVo.name}
+		where id = #{userId};
+	</update>
 	
 	<select id="checkUserId" resultType="int">
 		select count(*)
-		from login_user
+		from user
 		where id=#{id};
 	</select>
 	
 	<delete id="deleteUser">
-		delete from login_user
+		delete from user
 		where id = #{id};
 	</delete>
 	
 	<select id="selectUser" resultMap="UserMap">
 		select *
-		from login_user
+		from user
 		where id=#{id};
 	</select>
 	
 	<select id="selectUserList" resultMap="UserMap">
 		select *
-		from login_user
+		from user
+		limit #{offset}, #{recordSize}
+	</select>
+
+	<select id="countUser" resultType="int">
+		select COUNT(*)
+		from user
+	    limit #{offset}, #{recordSize}
 	</select>
 	
 	<update id="userAutoLogin">
-		update login_user
+		update user
 		set 
 			session_id=#{sessionId},
 			limit_date=#{limitDate}
@@ -51,7 +65,7 @@
 	
 	<select id="selectUserWithSessionId">
 		select *
-		from login_user
+		from user
 		where sessionId = #{sessionId}
 	</select>
 	

@@ -4,6 +4,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.example.login.dto.SearchDto;
+import com.example.login.dto.SearchDto.SearchRequestDto;
+import com.example.login.dto.UserDto.UserListDto;
+import com.example.login.dto.UserDto.UserResponseDto;
+import com.example.login.dto.UserDto.JoinRequestDto;
 import org.apache.ibatis.annotations.Mapper;
 
 import com.example.login.vo.UserVO;
@@ -12,13 +17,19 @@ import com.example.login.vo.UserVO;
 public interface IUserMapper {
 	
 	//회원정보 등록
-	void insertUser(UserVO vo);
+	void insertUser(UserVO userVo);
+
+	//회원정보 수정
+	void updateUser(Map<String,Object> map);
 
 	//회원정보 조회
 	UserVO selectUser(String id);
 
 	//회원정보 전체조회
-	List<UserVO> selectUserList();
+	List<UserVO> selectUserList(SearchRequestDto searchRequestDto);
+
+	//회원 수 조회
+	List<UserVO> countUser(SearchRequestDto searchRequestDto);
 
 	//회원 탈퇴
 	void deleteUser(String id);
@@ -29,6 +40,6 @@ public interface IUserMapper {
 	//특정 회원의 세션아이디와 쿠키 유효기간을 저장
 	void userAutoLogin(Map<String,Object> map);
 	
-	//세션아이디로 회원조회
+	// 로그인 체크
 	UserVO selectUserWithSessionId(String sessionId);
 }

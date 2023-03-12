@@ -27,8 +27,8 @@ public class SwaggerConfig {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("User Swagger")
-                .description("user api swagger config")
+                .title("Hotpler API Swagger")
+                .description("Hotpler API swagger config")
                 .version("1.0")
                 .build();
     }

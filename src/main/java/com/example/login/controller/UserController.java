@@ -1,6 +1,8 @@
 package com.example.login.controller;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -8,22 +10,20 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.example.login.common.api.ApiResult;
+import com.example.login.dto.SearchDto.SearchRequestDto;
+import com.example.login.dto.UserDto.UpdateRequestDto;
+import com.example.login.dto.UserDto.UserResponseDto;
+import com.example.login.dto.UserDto.UserListDto;
 import com.example.login.dto.UserDto.LoginRequestDto;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import com.example.login.dto.UserDto.JoinRequestDto;
+import io.swagger.annotations.*;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpRequest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.WebUtils;
-
 import com.example.login.service.LoginService;
 import com.example.login.vo.UserVO;
 
@@ -32,7 +32,7 @@ import com.example.login.vo.UserVO;
 @Api(tags = "사용자")
 public class UserController {
 
-	// API return 값
+	// API 공통 return 값
 	ApiResult apiResult;
 
 	@Autowired
@@ -40,139 +40,120 @@ public class UserController {
 
 	@ApiOperation(value="회원 가입")
 	@PostMapping("/")
-	public ApiResult insertUser(@RequestBody UserVO vo) {
+	public ApiResult insertUser(@RequestBody JoinRequestDto joinRequestDto) {
 
-		service.insertUser(vo);
-
-		apiResult = ApiResult.builder()
-				.resultYn("Y")
-				.message("")
+		UserVO userVo = UserVO.builder()
+				.id(joinRequestDto.getId())
+				.name(joinRequestDto.getName())
+				.password(joinRequestDto.getPassword())
 				.build();
 
-		return apiResult;
+		return service.insertUser(userVo);
+	}
+
+	@ApiOperation(value="회원 수정")
+	@ApiImplicitParam(name = "id", value = "사용자 아이디")
+	@PutMapping("/{id}")
+	public ApiResult updateUser(@PathVariable String id, @RequestBody UpdateRequestDto updateRequestDto) {
+
+		UserVO userVo = UserVO.builder()
+				.id(updateRequestDto.getId())
+				.name(updateRequestDto.getName())
+				.build();
+
+		return service.updateUser(id, userVo);
 	}
 
 	@ApiOperation(value="회원 조회")
+	@ApiImplicitParam(name = "id", value = "사용자 아이디")
 	@GetMapping("/{id}")
-	public UserVO selectUser(@PathVariable String id) {
+	public UserResponseDto selectUser(@PathVariable String id) {
 
-		return service.selectUser(id);
+		UserVO userVo = service.selectUser(id);
+
+		UserResponseDto userResponseDto = UserResponseDto.builder()
+				.id(userVo.getId())
+				.name(userVo.getName())
+				.joinDate(userVo.getJoinDate())
+				.autoLogin(userVo.isAutoLogin())
+				.limitDate(userVo.getLimitDate())
+				.build();
+
+		return userResponseDto;
+	}
+
+	@ApiOperation(value="회원 리스트 조회")
+	@ApiImplicitParams(
+			{
+					@ApiImplicitParam(name = "page", value = "현재 페이지"),
+					@ApiImplicitParam(name = "recordSize", value = "페이지당 출력할 데이터 개수"),
+					@ApiImplicitParam(name = "keyword", value = "검색 키워드"),
+					@ApiImplicitParam(name = "searchType", value = "검색 유형")
+			}
+	)
+	@GetMapping("/userList")
+	public List<UserListDto> selectUserList(@ApiParam(value = "page", required = false) @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+											@ApiParam(value = "recordSize", required = false) @RequestParam(value = "recordSize", required = false, defaultValue = "10") int recordSize,
+											@ApiParam(value = "keyword", required = false) @RequestParam(value = "keyword", required = false) String keyword,
+											@ApiParam(value = "searchType", required = false) @RequestParam(value = "searchType", required = false) String searchType
+											) {
+
+		List<UserListDto> returnList = new ArrayList<>();
+
+		SearchRequestDto searchRequestDto = SearchRequestDto.builder()
+				.page(page)
+				.recordSize(recordSize)
+				.keyword(keyword)
+				.searchType(searchType)
+				.build();
+
+		List<UserVO> userList = service.selectUserList(searchRequestDto);
+
+		for (UserVO userVo : userList){
+
+			UserListDto usersListDto = UserListDto.builder()
+					.id(userVo.getId())
+					.name(userVo.getName())
+					.joinDate(userVo.getJoinDate())
+					.autoLogin(userVo.isAutoLogin())
+					.limitDate(userVo.getLimitDate())
+					.build();
+
+			returnList.add(usersListDto);
+		}
+
+		return returnList;
 	}
 
 	@ApiOperation(value="회원 탈퇴")
+	@ApiImplicitParam(name = "id", value = "사용자 아이디")
 	@DeleteMapping("/{id}")
 	public ApiResult deleteUser(@PathVariable String id) {
 
-		service.deleteUser(id);
-
-		apiResult = ApiResult.builder()
-				.resultYn("Y")
-				.message("")
-				.build();
-
-		return apiResult;
+		return service.deleteUser(id);
 	}
 
 
 	@ApiOperation(value="로그인")
-	@PostMapping("/loginCheck")
-	public ApiResult login(@RequestBody LoginRequestDto loginRequest , HttpSession session , HttpServletResponse response) {
+	@PostMapping("/login")
+	public ApiResult login(@RequestBody LoginRequestDto loginRequestDto , HttpSession session , HttpServletResponse response) {
 
-		BCryptPasswordEncoder encode = new BCryptPasswordEncoder();
-
-		UserVO db = service.selectUser(loginRequest.getId());
-		if(db != null) {
-			if(encode.matches(loginRequest.getPassword(),db.getPassword())) {
-				session.setAttribute("login",db);
-				
-				//자동로그인을 체크했을시에 실행
-				if(loginRequest.isAutoLogin()) {
-					
-					//3개월뒤의 초
-					long second = 60 * 60 * 24 * 90;
-					
-					//쿠키생성
-					Cookie cookie = new Cookie("loginCookie",session.getId());
-					cookie.setPath("/");
-					cookie.setMaxAge((int)second);
-				    response.addCookie(cookie);
-				    
-				    //3개월뒤의 밀리초를 날짜로 변환
-				    long millis = System.currentTimeMillis() + (second * 1000); 
-				    Date limitDate = new Date(millis);
-				    
-				    //DB에 세션아이디,쿠키만료날짜,회원 아이디 전달
-				    service.userAutoLogin(session.getId(),limitDate,loginRequest.getId());
-				}
-				apiResult = ApiResult.builder()
-						.resultYn("Y")
-						.message("loginSuccess")
-						.build();
-
-			}else {
-				apiResult = ApiResult.builder()
-						.resultYn("N")
-						.message("pwFail")
-						.build();
-			}
-		}else {
-			apiResult = ApiResult.builder()
-					.resultYn("N")
-					.message("idFail")
-					.build();
-		}
-
-		return apiResult;
+		return service.userLoginCheck(loginRequestDto, service.selectUser(loginRequestDto.getId()), response, session);
 	}
 
 	@ApiOperation(value="로그 아웃")
 	@PostMapping("/logout")
 	public ApiResult logout(HttpSession session , HttpServletRequest request , HttpServletResponse response) {
-		
-		UserVO user = (UserVO)session.getAttribute("login");
 
-		if(user!= null) {
-			session.removeAttribute("login"); 
-			session.invalidate();
-
-			Cookie cookie = WebUtils.getCookie(request,"loginCookie");
-			
-			//자동로그인을 한 상태의 사용자가 로그아웃을 할 경우
-			if(cookie != null) {
-	
-				cookie.setMaxAge(0);
-				response.addCookie(cookie);
-				service.userAutoLogin("none", new Date(), user.getId());
-			}
-		}
-
-		apiResult = ApiResult.builder()
-				.resultYn("Y")
-				.message("")
-				.build();
-
-		return apiResult;
+		return service.userLogout((UserVO)session.getAttribute("login"), request, response, session);
 	}
 
 	@ApiOperation(value="아이디 중복 확인")
+	@ApiImplicitParam(name = "id", value = "사용자 아이디")
 	@PostMapping("/check/{id}")
 	public ApiResult checkUser(@PathVariable String id) {
 
-		int num = service.checkUserId(id);
-
-		//변수 num이 1일경우 아이디 중복 0일경우 아이디 등록가능
-		if(num == 1) {
-			apiResult = ApiResult.builder()
-					.resultYn("N")
-					.message("id exists")
-					.build();
-		}else {
-			apiResult = ApiResult.builder()
-					.resultYn("Y")
-					.message("id not exists")
-					.build();
-		}
-		return apiResult;
+		return service.checkUserId(id);
 	}
 	
 

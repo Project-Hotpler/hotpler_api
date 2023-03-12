@@ -70,7 +70,7 @@ class UserControllerTest {
                .contentType(MediaType.APPLICATION_JSON)
                .content(jsonData))
                .andExpect(status().isOk())
-               .andExpect(jsonPath("$.resultYn", "Y").exists());
+               .andExpect(jsonPath("$.status", "success").exists());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -86,11 +86,11 @@ class UserControllerTest {
 
             String jsonData = new Gson().toJson(userVo);
 
-            mvc.perform(post("/api/user/loginCheck")
+            mvc.perform(post("/api/user/login")
                .contentType(MediaType.APPLICATION_JSON)
                .content(jsonData))
                .andExpect(status().isOk())
-               .andExpect(jsonPath("$.resultYn", "Y").exists());
+               .andExpect(jsonPath("$.status", "success").exists());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -122,7 +122,7 @@ class UserControllerTest {
                .contentType(MediaType.APPLICATION_JSON)
                .session(session))
                .andExpect(status().isOk())
-               .andExpect(jsonPath("$.resultYn", "Y").exists());
+               .andExpect(jsonPath("$.status", "success").exists());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -136,7 +136,7 @@ class UserControllerTest {
             mvc.perform(post("/api/user/check/testId")
                .contentType(MediaType.APPLICATION_JSON))
                .andExpect(status().isOk())
-               .andExpect(jsonPath("$.resultYn", "Y").exists());
+               .andExpect(jsonPath("$.status", "success").exists());
 
         } catch (Exception e) {
             e.printStackTrace();

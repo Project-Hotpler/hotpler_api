@@ -23,8 +23,8 @@ public class ApiExceptionAdvice {
         return ResponseEntity
                 .status(e.getError().getStatus())
                 .body(ApiResult.builder()
-                        .resultYn("N")
-                        .message("error")
+                        .status("error")
+                        .message("")
                         .exception(apiExceptionEntity)
                         .build());
     }
@@ -42,8 +42,8 @@ public class ApiExceptionAdvice {
         return ResponseEntity
                 .status(ExceptionEnum.RUNTIME_EXCEPTION.getStatus())
                 .body(ApiResult.builder()
-                        .resultYn("N")
-                        .message("error")
+                        .status("error")
+                        .message("")
                         .exception(apiExceptionEntity)
                         .build());
     }
@@ -61,8 +61,8 @@ public class ApiExceptionAdvice {
         return ResponseEntity
                 .status(ExceptionEnum.ACCESS_DENIED_EXCEPTION.getStatus())
                 .body(ApiResult.builder()
-                        .resultYn("N")
-                        .message("error")
+                        .status("error")
+                        .message("")
                         .exception(apiExceptionEntity)
                         .build());
     }
@@ -80,8 +80,8 @@ public class ApiExceptionAdvice {
         return ResponseEntity
                 .status(ExceptionEnum.INTERNAL_SERVER_ERROR.getStatus())
                 .body(ApiResult.builder()
-                        .resultYn("N")
-                        .message("error")
+                        .status("error")
+                        .message("")
                         .exception(apiExceptionEntity)
                         .build());
     }

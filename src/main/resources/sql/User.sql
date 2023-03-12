@@ -1,4 +1,4 @@
-Create table login_user(
+Create table user(
 	id varchar(100) primary key,
     password varchar(100) NOT NULL,
     name varchar(20) NOT NULL,
@@ -7,5 +7,5 @@ Create table login_user(
 );
 
 //자동로그인을 위한 컬럼 추가
-alter table login_user add column session_id varchar(100) not null default "none";
-alter table login_user add column limit_date timestamp;
+alter table user add column session_id varchar(100) not null default "none";
+alter table user add column limit_date timestamp;

@@ -7,13 +7,13 @@ import lombok.*;
 @NoArgsConstructor
 @ToString
 public class ApiResult{
-    private String resultYn;
+    private String status;
     private String message;
     private ApiExceptionEntity exception;
 
     @Builder
-    public ApiResult(String resultYn, String message, ApiExceptionEntity exception) {
-        this.resultYn = resultYn;
+    public ApiResult(String status, String message, ApiExceptionEntity exception) {
+        this.status = status;
         this.message = message;
         this.exception = exception;
     }

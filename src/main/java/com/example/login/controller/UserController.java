@@ -1,10 +1,8 @@
 package com.example.login.controller;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -17,14 +15,9 @@ import com.example.login.dto.UserDto.UserListDto;
 import com.example.login.dto.UserDto.LoginRequestDto;
 import com.example.login.dto.UserDto.JoinRequestDto;
 import io.swagger.annotations.*;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpRequest;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.util.WebUtils;
-import com.example.login.service.LoginService;
+import com.example.login.service.UserService;
 import com.example.login.vo.UserVO;
 
 @RestController
@@ -36,9 +29,9 @@ public class UserController {
 	ApiResult apiResult;
 
 	@Autowired
-	LoginService service;
+	UserService service;
 
-	@ApiOperation(value="회원 가입")
+	@ApiOperation(value="회원 가입", notes="")
 	@PostMapping("/")
 	public ApiResult insertUser(@RequestBody JoinRequestDto joinRequestDto) {
 
@@ -92,10 +85,10 @@ public class UserController {
 			}
 	)
 	@GetMapping("/userList")
-	public List<UserListDto> selectUserList(@ApiParam(value = "page", required = false) @RequestParam(value = "page", required = false, defaultValue = "0") int page,
-											@ApiParam(value = "recordSize", required = false) @RequestParam(value = "recordSize", required = false, defaultValue = "10") int recordSize,
-											@ApiParam(value = "keyword", required = false) @RequestParam(value = "keyword", required = false) String keyword,
-											@ApiParam(value = "searchType", required = false) @RequestParam(value = "searchType", required = false) String searchType
+	public List<UserListDto> selectUserList(@RequestParam(value = "page", required = false, defaultValue = "0") int page,
+											@RequestParam(value = "recordSize", required = false, defaultValue = "10") int recordSize,
+											@RequestParam(value = "keyword", required = false) String keyword,
+											@RequestParam(value = "searchType", required = false) String searchType
 											) {
 
 		List<UserListDto> returnList = new ArrayList<>();
@@ -134,21 +127,24 @@ public class UserController {
 	}
 
 
-	@ApiOperation(value="로그인")
+	@ApiOperation(value="로그인", notes="Status Fail Case"
+			+ "\n 1. 아이디가 틀렸을 때 -> message: idFail"
+			+ "\n 2. 비밀번호가 틀렸을 때 -> message: pwFail")
 	@PostMapping("/login")
-	public ApiResult login(@RequestBody LoginRequestDto loginRequestDto , HttpSession session , HttpServletResponse response) {
+	public ApiResult login(@RequestBody LoginRequestDto loginRequestDto, HttpServletRequest request, HttpServletResponse response) {
 
-		return service.userLoginCheck(loginRequestDto, service.selectUser(loginRequestDto.getId()), response, session);
+		return service.userLoginCheck(loginRequestDto, service.selectUser(loginRequestDto.getId()), response, request);
 	}
 
 	@ApiOperation(value="로그 아웃")
 	@PostMapping("/logout")
-	public ApiResult logout(HttpSession session , HttpServletRequest request , HttpServletResponse response) {
+	public ApiResult logout(HttpServletRequest request, HttpServletResponse response) {
 
-		return service.userLogout((UserVO)session.getAttribute("login"), request, response, session);
+		return service.userLogout((UserVO)request.getSession().getAttribute("login"), request, response, request.getSession());
 	}
 
-	@ApiOperation(value="아이디 중복 확인")
+	@ApiOperation(value="아이디 중복 확인", notes="Status Fail Case"
+			+ "\n 1. 아이디가 존재할 때 -> message: id exists")
 	@ApiImplicitParam(name = "id", value = "사용자 아이디")
 	@PostMapping("/check/{id}")
 	public ApiResult checkUser(@PathVariable String id) {

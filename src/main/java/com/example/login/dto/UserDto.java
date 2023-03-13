@@ -109,4 +109,19 @@ public class UserDto {
             this.limitDate = limitDate;
         }
     }
+
+    @Getter
+    @NoArgsConstructor
+    public static class KakaoJoinRequestDto{
+
+        private String id;
+
+        private String name;
+
+        @Builder
+        public KakaoJoinRequestDto(String id, String password, String name) {
+            this.id = id;
+            this.name = name;
+        }
+    }
 }

@@ -8,9 +8,6 @@ import java.util.Map;
 import com.example.login.common.api.ApiResult;
 import com.example.login.dto.SearchDto.SearchRequestDto;
 import com.example.login.dto.UserDto.LoginRequestDto;
-import com.example.login.dto.UserDto.UserListDto;
-import com.example.login.dto.UserDto.UserResponseDto;
-import com.example.login.dto.UserDto.JoinRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,7 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 @Service
-public class LoginService implements ILoginService {
+public class UserService implements IUserService {
 
 	// API 공통 return 값
 	ApiResult apiResult;
@@ -136,14 +133,14 @@ public class LoginService implements ILoginService {
 	}
 
 	@Override
-	public ApiResult userLoginCheck(LoginRequestDto loginRequestDto, UserVO userVo, HttpServletResponse response, HttpSession session) {
+	public ApiResult userLoginCheck(LoginRequestDto loginRequestDto, UserVO userVo, HttpServletResponse response, HttpServletRequest request) {
 
 		if(userVo != null) {
 
 			BCryptPasswordEncoder encode = new BCryptPasswordEncoder();
 
 			if(encode.matches(loginRequestDto.getPassword(),userVo.getPassword())) {
-				session.setAttribute("login",userVo);
+				request.getSession().setAttribute("login",userVo);
 
 				//자동로그인을 체크했을시에 실행
 				if(loginRequestDto.isAutoLogin()) {
@@ -152,7 +149,7 @@ public class LoginService implements ILoginService {
 					long second = 60 * 60 * 24 * 90;
 
 					//쿠키생성
-					Cookie cookie = new Cookie("loginCookie",session.getId());
+					Cookie cookie = new Cookie("loginCookie", request.getSession().getId());
 					cookie.setPath("/");
 					cookie.setMaxAge((int)second);
 					response.addCookie(cookie);
@@ -162,7 +159,7 @@ public class LoginService implements ILoginService {
 					Date limitDate = new Date(millis);
 
 					//DB에 세션아이디,쿠키만료날짜,회원 아이디 전달
-					userAutoLogin(session.getId(),limitDate,loginRequestDto.getId());
+					userAutoLogin(request.getSession().getId(), limitDate, loginRequestDto.getId());
 				}
 
 				apiResult = ApiResult.builder()

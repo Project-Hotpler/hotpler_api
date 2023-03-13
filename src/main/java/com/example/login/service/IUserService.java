@@ -6,16 +6,13 @@ import java.util.List;
 import com.example.login.common.api.ApiResult;
 import com.example.login.dto.SearchDto.SearchRequestDto;
 import com.example.login.dto.UserDto.LoginRequestDto;
-import com.example.login.dto.UserDto.UserListDto;
-import com.example.login.dto.UserDto.UserResponseDto;
-import com.example.login.dto.UserDto.JoinRequestDto;
 import com.example.login.vo.UserVO;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-public interface ILoginService {
+public interface IUserService {
 		
 		// 회원정보 등록
 		ApiResult insertUser(UserVO userVo);
@@ -45,7 +42,7 @@ public interface ILoginService {
 		UserVO selectUserWithSessionId(String sessionId);
 
 		// 로그인 성공 여부 체크
-	 	ApiResult userLoginCheck(LoginRequestDto loginRequestDto, UserVO userVo, HttpServletResponse response, HttpSession session);
+	 	ApiResult userLoginCheck(LoginRequestDto loginRequestDto, UserVO userVo, HttpServletResponse response, HttpServletRequest request);
 
 		// 로그아웃
 		ApiResult userLogout(UserVO userVo, HttpServletRequest request, HttpServletResponse response, HttpSession session);

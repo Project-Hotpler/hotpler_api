@@ -1,4 +1,4 @@
-package com.example.login;
+package com.example.login.common.intercepter;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,7 +21,7 @@ public class ServerConfigure implements WebMvcConfigurer{
 
 	// 로그인 검증 안해도 되는 URL
 	String[] loginCheckUrl = {
-			"/api/user/login", "/api/user/", "/api/user/check/{id}"
+			"/api/test/**/", "/api/user/login", "/api/user/", "/api/user/check/{id}"
 	};
 	List<String> loginCheckUrlList = Arrays.asList(loginCheckUrl);
 

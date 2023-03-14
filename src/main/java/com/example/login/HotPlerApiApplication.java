@@ -3,15 +3,13 @@ package com.example.login;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
-@MapperScan(basePackageClasses = LoginApplication.class)
+@MapperScan(basePackageClasses = HotPlerApiApplication.class)
 @SpringBootApplication
-public class LoginApplication {
+public class HotPlerApiApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(LoginApplication.class, args);
+		SpringApplication.run(HotPlerApiApplication.class, args);
 	}
 
 }
